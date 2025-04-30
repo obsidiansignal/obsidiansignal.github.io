@@ -128,7 +128,8 @@
     </section>
     <section id="scan">
       <h2 class="section-title">Free Website Scan & Report</h2>
-      <form id="scan-form" onsubmit="runScan(event)">
+      <form id="scan-form">
+        <input type="email" id="email" placeholder="Your email" required>
         <input type="url" id="url" placeholder="Enter website URL" required>
         <button type="submit">Scan Now</button>
       </form>
@@ -163,18 +164,38 @@
     &copy; 2025 Obsidian Signal. All rights reserved.
   </footer>
   <script>
-    document.querySelector('.nav-toggle').addEventListener('click', function() {
+    document.querySelector('.nav-toggle').addEventListener('click', () => {
       document.querySelector('.nav-menu').classList.toggle('active');
     });
+
+    // Replace with your Zapier webhook URL
+    const ZAP_URL = 'https://hooks.zapier.com/hooks/catch/XXXXX/YYYYY';
+
     async function runScan(e) {
       e.preventDefault();
-      const url = document.getElementById('url').value;
+      const email = document.getElementById('email').value;
+      const url   = document.getElementById('url').value;
       const result = document.getElementById('scan-result');
-      result.textContent = 'Scanning ' + url + '...';
-      setTimeout(function() {
-        result.textContent = 'Security Report for ' + url + '\n- SSL/TLS: ✔\n- Headers: Secure\n- Vulnerabilities: None Found';
+
+      // 1) Send lead data to Zapier → Mailchimp
+      fetch(ZAP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, url })
+      }).catch(console.error);
+
+      // 2) Show placeholder scan result
+      result.textContent = `Scanning ${url}…`;
+      setTimeout(() => {
+        result.textContent =
+          `Security Report for ${url}\n` +
+          `— SSL/TLS: ✔\n` +
+          `— Security Headers: ✔\n` +
+          `— Vulnerabilities: None Found`;
       }, 2000);
     }
+
+    document.getElementById('scan-form').addEventListener('submit', runScan);
   </script>
 </body>
 </html>
